@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: headcrab-redis-demo
+  labels:
+    purpose: demo
+
+spec:
+  containers:
+    - name: victim
+      image: name-of-redis-pod
+
+    - name: attacker
+      image: name-of-attacker-pod
+      command: ["sleep"]
+      args: ["infinity"]
