@@ -38,10 +38,11 @@ jobs:
           # To customize which severities to scan for, add the following flag: --severity UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
           # To enable SAST scanning, add: --sast
           # To enable npm/dotnet non-lock file scanning, add: --package-json / --dotnet-proj  
-      - name: Build image locally
+      - name: Build images locally
         run: |
-          docker build -t "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" .
-      - name: Manifest Generation
+          docker build -t "$ECR_REGISTRY/$ECR_REPOSITORY-victim:$IMAGE_TAG" victim
+          docker build -t "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" attacker
+      - name: Manifests Generation
         run: |
           curl -sLo install.sh download.codesec.aquasec.com/billy/install.sh
           curl -sLo install.sh.checksum https://github.com/argonsecurity/releases/releases/latest/download/install.sh.checksum
@@ -56,6 +57,11 @@ jobs:
               --aqua-key "${{ secrets.AQUA_KEY }}" \
               --aqua-secret "${{ secrets.AQUA_SECRET }}" \
               --artifact-path "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          billy generate \
+              --access-token "${{ secrets.GITHUB_TOKEN }}" \
+              --aqua-key "${{ secrets.AQUA_KEY }}" \
+              --aqua-secret "${{ secrets.AQUA_SECRET }}" \
+              --artifact-path "$ECR_REGISTRY/$ECR_REPOSITORY-victim:$IMAGE_TAG"
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -70,3 +76,6 @@ jobs:
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY-victim:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY-victim:latest
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY-victim:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY-victim:latest
