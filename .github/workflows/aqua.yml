@@ -86,6 +86,7 @@ jobs:
         run: |
           sed -i "s|name-of-redis-pod:.*|${DEPLOY_IMAGE}-victim:latest|" headcrab.yaml
           sed -i "s|name-of-attacker-pod:.*|${DEPLOY_IMAGE}:latest|" headcrab.yaml
+          kubectl version
           kubectl apply -f headcrab.yaml
         env: 
           DEPLOY_IMAGE: ${{secrets.ECR_REGISTRY}}/${{secrets.ECR_REPOSITORY}}
