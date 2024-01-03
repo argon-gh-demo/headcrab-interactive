@@ -84,6 +84,8 @@ jobs:
           aws eks --region ${{ secrets.AWS_REGION }} update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }}
       - name: Deploy to EKS
         run: |
+          kubectl config get-contexts
+          kubectl config current-context
           sed -i "s|name-of-redis-pod:.*|${DEPLOY_IMAGE}-victim:latest|" headcrab.yaml
           sed -i "s|name-of-attacker-pod:.*|${DEPLOY_IMAGE}:latest|" headcrab.yaml
           kubectl version
